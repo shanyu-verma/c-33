@@ -8,6 +8,11 @@ var box1, pig1,pig3;
 var backgroundImg,platform;
 var bird, slingshot;
 
+var visibility = 255;
+
+
+var birds = [];
+
 var gameState = "onSling";
 var bg = "sprites/bg1.png";
 var score = 0;
@@ -42,6 +47,19 @@ function setup(){
 
     bird = new Bird(200,50);
 
+    bird2 = new Bird(150,170);
+    bird3 = new Bird(100,170);
+    bird4 = new Bird(50,170);
+
+    birds.push(bird4);
+    birds.push(bird3);
+    birds.push(bird2);
+    birds.push(bird);
+
+
+
+
+
     //log6 = new Log(230,180,80, PI/2);
     slingshot = new SlingShot(bird.body,{x:200, y:50});
 }
@@ -75,34 +93,57 @@ function draw(){
     log5.display();
 
     bird.display();
+    bird2.display();
+    bird3.display();
+    bird4.display();
     platform.display();
     //log6.display();
     slingshot.display();    
 }
 
 function mouseDragged(){
-    //if (gameState!=="launched"){
-        Matter.Body.setPosition(bird.body, {x: mouseX , y: mouseY});
-    //}
+    if (gameState!=="launched"){
+        Matter.Body.setPosition(birds[birds.length - 1].body, {x: mouseX , y: mouseY});
+        Matter.body.applyForce(birds[birds.length - 1].body,birds[birds.length - 1].body.position,{x:5,y:-5});
+        return false;
+    }
 }
 
 
 function mouseReleased(){
     slingshot.fly();
+
+    console.log(birds[birds.length - 1]);
+    //World.remove(world, birds[birds.length - 1]);
+    //push();
+    //visibility = visibility - 5;
+    //tint(255,visibility);
+    //image(this.image, this.body.position.x, this.body.position.y, 50, 50);
+    //pop();
+
+    birds.pop();
     gameState = "launched";
+    return false;
+    
 }
 
 function keyPressed(){
-    if(keyCode === 32){
-       slingshot.attach(bird.body);
+
+    if(keyCode === 32 && gameState === "launched" && birds[birds.length - 1].body.speed < 1){
+      bird.trajectory = [];
+      Matter.Body.setPosition(birds[birds.length - 1].body, {x : 200, y : 50});
+      Matter.Body.setAngle(birds[birds.length - 1].body,0);
+        slingshot.attach(birds[birds.length - 1].body);
+        //slingshot.fly();
+     gameState = "onSling";
     }
 }
 
 async function getBackgroundImg(){
-    var response = await fetch("http://worldtimeapi.org/api/timezone/Asia/Kolkata");
+    var response = await fetch("http://worldclockapi.com/api/json/est/now");
     var responseJSON = await response.json();
 
-    var datetime = responseJSON.datetime;
+    var datetime = responseJSON.currentDateTime;
     var hour = datetime.slice(11,13);
     
     if(hour>=0600 && hour<=1900){
